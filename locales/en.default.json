@@ -1,4 +1,9 @@
 {
+    "plus": {
+        "checkout": {
+            "no_pox_box_shipping_address_error": "PO Boxes are not supported!"
+        }
+    },
     "general": {
         "password_page": {
             "login_form_heading": "Enter store using password:",

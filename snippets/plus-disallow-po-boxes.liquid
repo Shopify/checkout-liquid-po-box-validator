@@ -1,0 +1,102 @@
+<style>
+  .plus-field-error input {
+    border-color: {{ settings.checkout_input_error_color }} !important;
+    -webkit-box-shadow: 0 0 0 1px {{ settings.checkout_input_error_color }};
+    box-shadow: 0 0 0 1px {{ settings.checkout_input_error_color }};
+  }
+  .plus-field-error__message {
+    line-height: 1.3em;
+    margin: 0.57143em 0 0.28571em;
+    color: {{ settings.checkout_input_error_color }};
+  }
+</style>
+
+
+
+<script>
+  window.Plus = window.Plus || {};
+  window.Plus.checkout = window.Plus.checkout || {};
+  (function($) {
+    $(document).on("page:load page:change", function () {
+        if (Shopify.Checkout.step == "contact_information") {
+          Plus.checkout.disallowPoBoxShippingAddressInit(Plus.checkout.settings)
+        }
+    });
+    
+    Plus.checkout.settings = {
+      address1Selector: '[data-step] [name="checkout[shipping_address][address1]"]input:visible',
+      address2Selector: '[data-step] [name="checkout[shipping_address][address2]"]input:visible',
+      formSelector: '[data-step] form',
+      formSubmitSelector: '[type="submit"]',
+      regex: /(?:P(?:ost(?:al)?)?[\.\-\s]*(?:(?:O(?:ffice)?[\.\-\s]*)?B(?:ox|in|\b|\d)|o(?:ffice|\b)(?:[-\s]*\d)|code)|box[-\s\b]*\d)/i,
+      fieldParentSelector: '[data-address-field]',
+      fieldErrorClass: 'plus-field-error',
+      fieldErrorMessageClass: 'plus-field-error__message',
+      fieldErrorSelector: '.plus-field-error__message',
+      errorText: '{{ "plus.checkout.no_pox_box_shipping_address_error" | t }}',
+    }
+    Plus.checkout.disallowPoBoxShippingAddressInit = function(settings) {
+      // Assigns the 2 address inputs to the variable. 
+      var addressInputSelectors = settings.address1Selector + ', ' + settings.address2Selector,
+          formSubmitSelector = settings.formSelector + ' ' + settings.formSubmitSelector,
+          $inputs = $(addressInputSelectors);
+    
+      $(formSubmitSelector).on('click', function(e) {
+        e.preventDefault();
+        var hasMatch = false;
+        
+        
+        $inputs.each(function() {
+          if (Plus.checkout.disallowPoBoRegex($(this), settings)) {
+            hasMatch = true;
+          }
+        });
+        
+        if (!hasMatch) {
+          $(this).closest(settings.formSelector).submit();
+        }
+      });
+    
+      // Check for inputs on blur
+      $inputs.blur(function() {
+        Plus.checkout.disallowPoBoRegex($(this), settings);
+      });
+      
+      // Intercept 'enter' for form submission
+      $(settings.formSelector).on('keypress', function(e) {
+        if (e.keyCode === 13) {
+          e.preventDefault();
+          $(this).find(settings.formSubmitSelector).trigger('click');
+        }
+      });
+    }
+    // Regex checker for inputs based containing a variety of 'PO box' inputs
+    Plus.checkout.disallowPoBoRegex = function(elem, settings) {
+      var hasMatch = false,
+          $current = $(elem),
+          $parent = $current.closest(settings.fieldParentSelector);
+          
+      if (settings.regex.test($current.val())) {
+        hasMatch = true;
+  
+        if (!($parent.hasClass(settings.fieldErrorClass))) {
+          $parent.addClass(settings.fieldErrorClass);
+        }
+        
+        if ($parent.find(settings.fieldErrorSelector).length < 1) {
+          $parent.append('<p class="' + settings.fieldErrorMessageClass + '">' + settings.errorText +'</p>');
+        }
+      } else {
+        if ($parent.hasClass(settings.fieldErrorClass)) {
+          $parent.removeClass(settings.fieldErrorClass);
+        }
+        
+        if ($parent.find(settings.fieldErrorSelector).length > 0) {
+          $parent.find(settings.fieldErrorSelector).remove();
+        }
+      }
+      
+      return hasMatch;
+    }
+  })(Checkout.$); 
+</script> 

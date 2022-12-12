@@ -1508,5 +1508,26 @@
                 "info": "t:settings_schema.cart.settings.cart_drawer.collection.info"
             }
         ]
+    },
+    {
+        "name": "[Plus] Disallow PO box shipping address at checkout",
+        "settings": [
+            {
+                "type": "header",
+                "content": "Disallow PO box shipping address at the contact information page of the checkout"
+            },
+            {
+                "type": "checkbox",
+                "id": "plus_no_pox_boxes",
+                "default": true,
+                "label": "Enable this to disallow PO box shipping address"
+            },
+            {
+                "type": "color",
+                "id": "checkout_input_error_color",
+                "default": "#FF0000",
+                "label": "Default text color of checkout error"
+            }
+        ]
     }
 ]

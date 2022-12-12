@@ -48,6 +48,10 @@
         </aside>
       </div>
     </div>
+
+    {%- if settings.plus_no_pox_boxes -%}
+      {% render 'plus-disallow-po-boxes' %}
+    {%- endif -%}
     
     {{ tracking_code }}
   </body>
